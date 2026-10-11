@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { extractBillData } from '../lib/billScanner'
 import { addTransaction, getTransactions } from '../lib/storage'
@@ -10,6 +10,7 @@ type Status = 'idle' | 'camera' | 'ocr' | 'done' | 'error'
 export default function ScannerScreen() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<Status>('idle')
   const [bill, setBill] = useState<ExtractedBillData | null>(null)
   const [amount, setAmount] = useState('')
@@ -17,6 +18,20 @@ export default function ScannerScreen() {
   const [description, setDescription] = useState('')
   const [categoryId, setCategoryId] = useState(1)
   const [error, setError] = useState('')
+
+  // Floating help (in App) triggers these via window events
+  useEffect(() => {
+    const onStartCamera = () => { startCamera() }
+    const onUpload = () => fileInputRef.current?.click()
+    window.addEventListener('help:start-camera', onStartCamera)
+    window.addEventListener('help:upload', onUpload)
+    return () => {
+      window.removeEventListener('help:start-camera', onStartCamera)
+      window.removeEventListener('help:upload', onUpload)
+      stopCamera()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function startCamera() {
     try {
@@ -116,7 +131,7 @@ export default function ScannerScreen() {
           <button className="primary" onClick={startCamera}>📷 Start camera</button>
           <label className="primary upload">
             🖼 Upload bill photo
-            <input type="file" accept="image/*" onChange={onUpload} hidden />
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={onUpload} hidden />
           </label>
           {error && <p className="error">{error}</p>}
         </div>

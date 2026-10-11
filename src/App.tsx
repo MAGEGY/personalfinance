@@ -49,7 +49,8 @@ export default function App() {
           { label: 'Transactions', description: 'Add and manage income and expense records', action: () => setTab('transactions') },
           { label: 'Budgets', description: 'Category budgets with progress bars and alerts', action: () => setTab('budgets') },
           { label: 'Savings goals', description: 'Create goals and contribute towards them', action: () => setTab('savings') },
-          { label: 'Scan a bill', description: 'OCR a bill photo to create an expense automatically', action: () => setTab('scan') },
+          { label: 'Scan a bill', description: 'Start the camera to OCR a bill into an expense', action: () => { setTab('scan'); window.dispatchEvent(new Event('help:start-camera')) } },
+          { label: 'Upload a bill photo', description: 'Use a photo from your device instead of the camera', action: () => { setTab('scan'); window.dispatchEvent(new Event('help:upload')) } },
         ]}
         howtos={HELP_HOWTOS}
       />
